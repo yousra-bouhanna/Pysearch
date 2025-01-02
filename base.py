@@ -1,13 +1,16 @@
 #1ère version: Scole de base de l'application, TD03 jusqu'au TD05
-#--------!!!MISE JOUR POUR L'UTILISATION DE LA CLASSE DOCUMENT ET LA CLASSE AUTHOR!!!------
+#--------!!!MISE JOUR POUR L'UTILISATION DE LA CLASSE DOCUMENT ET LA CLASSE AUTHOR ET LA CLASSE CORPUS!!!------
 #Importations
 import Document
 import Author
+import Corpus
 import datetime
 import praw
 import urllib.request
 import json
 import xmltodict
+import pandas as pd 
+
 
 
 #3.1: Chargement des données
@@ -28,7 +31,8 @@ id2aut={}
 hot_posts=reddit.subreddit('Chatgpt').hot(limit=300)
 for i, post in enumerate(hot_posts):
     if post.selftext:  # On évite les posts sans texte
-        doc = Document.Document(titre=post.title, auteur=post.author, date=datetime.datetime.fromtimestamp(post.created), url=post.url, texte=post.selftext)
+        date = datetime.datetime.fromtimestamp(post.created, tz=datetime.timezone.utc)#Ajouté avec l'aide de copilot pour la résolution d'une erreur de comparaison de dates
+        doc = Document.Document(titre=post.title, auteur=post.author, date=date, url=post.url, texte=post.selftext)
         id2doc[i] = doc
         author_name = str(post.author)
         if author_name not in id2aut:
@@ -54,8 +58,8 @@ for i, doc in enumerate(docs):
     else:
         author_names = authors["name"]
 
-    doc = Document.Document(titre=doc["title"], auteur=author_names, date=datetime.datetime.fromisoformat(doc["published"].replace("Z", "+00:00")), url=doc["id"], texte=doc["summary"])
-    author_name = str(author_names)
+    date = datetime.datetime.fromisoformat(doc["published"].replace("Z", "+00:00"))
+    doc = Document.Document(titre=doc["title"], auteur=author_names, date=date, url=doc["id"], texte=doc["summary"])
     if author_name not in id2aut:
         id2aut[author_name] = Author.Author(author_name)
     id2aut[author_name].add(doc)
@@ -69,7 +73,6 @@ print(len(id2aut))
 Pour éviter d'intéroger les APIs à chaque fois, on va sauvegarder les données dans un dataframe
 '''
 # Mise à jour du dataframe pour prendre en compte les attributs de la classe Document
-import pandas as pd 
 data=pd.DataFrame(columns=["id", "titre","auteur","date","url","texte","origin"])
 for i, doc in id2doc.items():
     if i<200:
@@ -109,3 +112,20 @@ print(len(all_docs))
 
 #Statistiques pour un auteur donnéc
 print(id2aut[list(id2aut.keys())[123]].stats())
+
+# 4.4: Création du corpus
+corpus=Corpus.Corpus("Mon corpus", id2aut, id2doc)
+print(corpus)
+
+# Les filtres pour les documents
+#print(corpus.sort_by_date(5, order="old"))
+#print(corpus.sort_by_date(5, order="recent"))
+print(corpus.sort_by_title(5, order="desc"))
+#print(corpus.sort_by_title(5, order="asc"))
+
+#4.5: Sauvegarde du corpus
+corpus.save("corpus.pkl")
+
+#4.6: Chargement du corpus
+corpus=corpus.load("corpus.pkl")
+

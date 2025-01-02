@@ -1,6 +1,6 @@
 # TDO4: Création des classes
 
-#4.1: Création de la classe Author
+#4.2: Création de la classe Author
 '''
 La classe Author aura pour attributs:
 - name 
