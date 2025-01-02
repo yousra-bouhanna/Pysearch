@@ -1,7 +1,8 @@
 #1ère version: Scole de base de l'application, TD03 jusqu'au TD05
-#--------!!!MISE JOUR POUR L'UTILISATION DE LA CLASSE DOCUMENT!!!------
+#--------!!!MISE JOUR POUR L'UTILISATION DE LA CLASSE DOCUMENT ET LA CLASSE AUTHOR!!!------
 #Importations
 import Document
+import Author
 import datetime
 import praw
 import urllib.request
@@ -23,13 +24,19 @@ reddit = praw.Reddit(client_id='c1P8veYayu3RTOnAeMOREw', client_secret='pBIMxgjr
 On va récupérer le titre, l'auteur, le texte et l'url de chaque post
 '''
 id2doc={}
+id2aut={}
 hot_posts=reddit.subreddit('Chatgpt').hot(limit=300)
 for i, post in enumerate(hot_posts):
-    if post.selftext:  # Vérifie si le texte n'est pas vide
+    if post.selftext:  # On évite les posts sans texte
         doc = Document.Document(titre=post.title, auteur=post.author, date=datetime.datetime.fromtimestamp(post.created), url=post.url, texte=post.selftext)
         id2doc[i] = doc
-        print(f"Reddit Post {i}: {doc.titre}, {doc.auteur}, {doc.date}, {doc.url}, {len(doc.texte)} characters")
+        author_name = str(post.author)
+        if author_name not in id2aut:
+            id2aut[author_name] = Author.Author(author_name)
+        id2aut[author_name].add(doc)
+
 print(len(id2doc))
+print(len(id2aut))
 
 # Scraping des données ArXiV
 query="Chatgpt"
@@ -40,10 +47,22 @@ data=data.decode()
 dic=xmltodict.parse(data)
 docs=dic["feed"]["entry"]
 for i, doc in enumerate(docs):
-    doc=Document.Document(titre=doc["title"], auteur=doc["author"], date=doc["published"], url=doc["id"], texte=doc["summary"])
-    id2doc[i+200]=doc
+    # Extraction des noms des auteurs car il peut y avoir plusieurs auteurs
+    authors = doc["author"]
+    if isinstance(authors, list):
+        author_names = ", ".join([author["name"] for author in authors])
+    else:
+        author_names = authors["name"]
+
+    doc = Document.Document(titre=doc["title"], auteur=author_names, date=datetime.datetime.fromisoformat(doc["published"].replace("Z", "+00:00")), url=doc["id"], texte=doc["summary"])
+    author_name = str(author_names)
+    if author_name not in id2aut:
+        id2aut[author_name] = Author.Author(author_name)
+    id2aut[author_name].add(doc)
+    id2doc[i+200] = doc
 
 print(len(id2doc))
+print(len(id2aut))
 
 #3.2: Sauvegarde des données
 '''
@@ -87,3 +106,6 @@ data.to_csv("data.csv", sep="\t", index=False)
 # Chaine de caractères de tous les documents concaténés
 all_docs=" ".join(data["texte"])
 print(len(all_docs))
+
+#Statistiques pour un auteur donnéc
+print(id2aut[list(id2aut.keys())[123]].stats())
