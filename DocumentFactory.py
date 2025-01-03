@@ -6,6 +6,7 @@ La classe DocumentFactory est une classe singleton qui permet de créer des docu
 Elle contient une méthode statique create_document qui prend en paramètre le type de document et les attributs du document.
 Elle retourne une instance de la classe correspondante.
 '''
+
 class DocumentFactory:
     @staticmethod
     def create_document(doc_type, **kwargs):
