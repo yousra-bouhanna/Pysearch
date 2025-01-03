@@ -1,5 +1,5 @@
 #1ère version: Scole de base de l'application, TD03 jusqu'au TD05
-#--------!!!MISE JOUR POUR L'UTILISATION DE LA CLASSE DOCUMENT ET LA CLASSE AUTHOR ET LA CLASSE CORPUS!!!------
+#--------!!!MISE JOUR POUR L'UTILISATION DE LA CLASSE DOCUMENT , LA CLASSE AUTHOR , LA CLASSE CORPUS et LES CLASSES FILLES!!!------
 #Importations
 import Document
 import Author
@@ -10,6 +10,7 @@ import urllib.request
 import json
 import xmltodict
 import pandas as pd 
+import DocumentFactory
 
 
 
@@ -32,7 +33,8 @@ hot_posts=reddit.subreddit('Chatgpt').hot(limit=300)
 for i, post in enumerate(hot_posts):
     if post.selftext:  # On évite les posts sans texte
         date = datetime.datetime.fromtimestamp(post.created, tz=datetime.timezone.utc)#Ajouté avec l'aide de copilot pour la résolution d'une erreur de comparaison de dates
-        doc = Document.Document(titre=post.title, auteur=post.author, date=date, url=post.url, texte=post.selftext)
+        num_comments = post.num_comments
+        doc = DocumentFactory.DocumentFactory.create_document('Reddit', titre=post.title, auteur=post.author, date=date, url=post.url, texte=post.selftext, nb_com=post.num_comments)
         id2doc[i] = doc
         author_name = str(post.author)
         if author_name not in id2aut:
@@ -51,19 +53,16 @@ data=data.decode()
 dic=xmltodict.parse(data)
 docs=dic["feed"]["entry"]
 for i, doc in enumerate(docs):
-    # Extraction des noms des auteurs car il peut y avoir plusieurs auteurs
     authors = doc["author"]
-    if isinstance(authors, list):
-        author_names = ", ".join([author["name"] for author in authors])
-    else:
-        author_names = authors["name"]
-
+    author_names = [author["name"] for author in authors] if isinstance(authors, list) else [authors["name"]]
     date = datetime.datetime.fromisoformat(doc["published"].replace("Z", "+00:00"))
-    doc = Document.Document(titre=doc["title"], auteur=author_names, date=date, url=doc["id"], texte=doc["summary"])
-    if author_name not in id2aut:
-        id2aut[author_name] = Author.Author(author_name)
-    id2aut[author_name].add(doc)
-    id2doc[i+200] = doc
+    doc = DocumentFactory.DocumentFactory.create_document('ArXiv', titre=doc["title"], auteur=author_names, date=date, url=doc["id"], texte=doc["summary"])
+    for author_name in author_names:
+        if author_name not in id2aut:
+            id2aut[author_name] = Author.Author(author_name)
+        id2aut[author_name].add(doc)
+    
+    id2doc[i + 200] = doc
 
 print(len(id2doc))
 print(len(id2aut))

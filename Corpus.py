@@ -1,4 +1,5 @@
 # TDO4: Création des classes
+# TD05: Mise à jour pour prendre en compte les classes filles de Document
 
 #4.3: Création de la classe Corpus
 '''
@@ -9,8 +10,8 @@ La classe Corpus aura pour attributs:
 - ndoc : nombre des documents
 - naut : nombre des auteurs
 '''
-from Author import Author
-from Document import Document
+import Author
+import Document
 import pickle
 
 class Corpus:
@@ -23,10 +24,18 @@ class Corpus:
 
     # Méthode pour ajouter un document
     def add(self, doc):
-        if doc.auteur not in self.authors:
-            self.naut += 1
-            self.authors[doc.auteur] = Author(doc.auteur)
-        self.authors[doc.auteur].add(doc.texte)
+        if isinstance(doc.auteur, list):
+            for auteur in doc.auteur:
+                if auteur not in self.authors:
+                    self.naut += 1
+                    self.authors[auteur] = Author(auteur)
+                self.authors[auteur].add(doc.texte)
+        else:
+            if doc.auteur not in self.authors:
+                self.naut += 1
+                self.authors[doc.auteur] = Author(doc.auteur)
+            self.authors[doc.auteur].add(doc.texte)
+        
         self.ndoc += 1
         self.id2doc[self.ndoc] = doc
     
