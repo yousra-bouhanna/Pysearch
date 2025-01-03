@@ -1,4 +1,4 @@
-#1ère version: Scole de base de l'application, TD03 jusqu'au TD05
+#1ère version: Socle de base de l'application, TD03 jusqu'au TD05
 #--------!!!MISE JOUR POUR L'UTILISATION DE LA CLASSE DOCUMENT , LA CLASSE AUTHOR , LA CLASSE CORPUS et LES CLASSES FILLES!!!------
 #Importations
 import Document
