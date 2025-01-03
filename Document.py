@@ -33,6 +33,9 @@ class Document:
     def __str__(self):
         return f"{self.titre}, par {self.auteur}"
     
+    def getType(self):
+        return "Document"
+    
 
 # 5.1: Création de la classe fille RedditDocument
 '''

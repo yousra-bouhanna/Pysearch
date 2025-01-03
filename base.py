@@ -29,7 +29,7 @@ On va récupérer le titre, l'auteur, le texte et l'url de chaque post
 '''
 id2doc={}
 id2aut={}
-hot_posts=reddit.subreddit('Chatgpt').hot(limit=300)
+hot_posts=reddit.subreddit('Chatgpt').hot(limit=50)
 for i, post in enumerate(hot_posts):
     if post.selftext:  # On évite les posts sans texte
         date = datetime.datetime.fromtimestamp(post.created, tz=datetime.timezone.utc)#Ajouté avec l'aide de copilot pour la résolution d'une erreur de comparaison de dates
@@ -41,12 +41,14 @@ for i, post in enumerate(hot_posts):
             id2aut[author_name] = Author.Author(author_name)
         id2aut[author_name].add(doc)
 
-print(len(id2doc))
-print(len(id2aut))
+nbr_RedditDocuments = len(id2doc)
+nbr_AuteurReddit = len(id2aut)
+print("Nombre de documents Reddit: ", nbr_RedditDocuments)
+print("Nombre d'auteurs Reddit: ", nbr_AuteurReddit)
 
 # Scraping des données ArXiV
 query="Chatgpt"
-url="http://export.arxiv.org/api/query?search_query=all:"+query+"&start=0&max_results=200"
+url="http://export.arxiv.org/api/query?search_query=all:"+query+"&start=0&max_results=50"
 data=urllib.request.urlopen(url).read()
 data=data.decode()
 # Conversion de data qui est sous forme XML en dictionnaire
@@ -64,8 +66,11 @@ for i, doc in enumerate(docs):
     
     id2doc[i + 200] = doc
 
-print(len(id2doc))
-print(len(id2aut))
+nbr_ArXivDocuments = len(id2doc) - nbr_RedditDocuments
+nbr_AuteurArXiv = len(id2aut) - nbr_AuteurReddit
+print("Nombre de documents ArXiv: ", nbr_ArXivDocuments)
+print("Nombre d'auteurs ArXiv: ", nbr_AuteurArXiv)
+
 
 #3.2: Sauvegarde des données
 '''
@@ -78,7 +83,6 @@ for i, doc in id2doc.items():
         data.loc[i]=[i, doc.titre, doc.auteur, doc.date, doc.url, doc.texte, "Reddit"]
     else:
         data.loc[i]=[i, doc.titre, doc.auteur, doc.date, doc.url, doc.texte, "ArXiv"]
-print(data.head())
 # Sauvgarde du dataframe
 data.to_csv("data.csv", sep="\t", index=False)
 # Chargement en mémoire
@@ -106,20 +110,20 @@ print("La taille du corpus aprés la suppression est de: ", data.shape[0])
 data.to_csv("data.csv", sep="\t", index=False)
 
 # Chaine de caractères de tous les documents concaténés
-all_docs=" ".join(data["texte"])
-print(len(all_docs))
+all_texts=" ".join(data["texte"])
+print("La longueur de la chaine de caractères est de: ", len(all_texts))
 
 #Statistiques pour un auteur donnéc
-print(id2aut[list(id2aut.keys())[123]].stats())
+print(id2aut[list(id2aut.keys())[1]].stats())
 
 # 4.4: Création du corpus
-corpus=Corpus.Corpus("Mon corpus", id2aut, id2doc)
+corpus=Corpus.Corpus("Mon corpus", id2aut, id2doc, all_texts)
 print(corpus)
 
 # Les filtres pour les documents
 #print(corpus.sort_by_date(5, order="old"))
 #print(corpus.sort_by_date(5, order="recent"))
-print(corpus.sort_by_title(5, order="desc"))
+print(corpus.sort_by_title(2, order="desc"))
 #print(corpus.sort_by_title(5, order="asc"))
 
 #4.5: Sauvegarde du corpus
@@ -127,4 +131,7 @@ corpus.save("corpus.pkl")
 
 #4.6: Chargement du corpus
 corpus=corpus.load("corpus.pkl")
+
+#6.6: Affichage de la table freq
+print(corpus.nbr_documents())
 
