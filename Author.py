@@ -12,7 +12,7 @@ class Author:
     def __init__(self, name):
         self.name = name
         self.ndoc = 0
-        self.production = {} #j'ai choisi un dictionnaire pour pouvoir indexer les documents par leur id (si jamais plus tard)
+        self.production = {} # un dictionnaire pour pouvoir indexer les documents par leur id (si jamais plus tard)
 
     # Méthode pour alimenter l'attribut production
     def add(self, production):

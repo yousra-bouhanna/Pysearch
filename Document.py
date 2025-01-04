@@ -11,10 +11,6 @@ La classe Document aura pour attributs:
 - texte 
 
 '''
-'''Vous devez pouvoir afficher la liste des articles contenus dans votre Corpus avec la source (Reddit
- ou Arxiv) d'où ils proviennent. Pour cela, il existe plusieurs solutions, mais vous implémenterez celle qui
- consiste à ajouter un champ type à la classe mère Document et à implémenter la méthode getType()
- directement dans les classes filles, comme vu en cours.'''
 
 class Document:
     # 5.3: Ajout de l'attribut type
