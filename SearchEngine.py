@@ -2,11 +2,12 @@
 '''
 La classe SearchEngine aura pour attributs:
 '''
-import Corpus
+from corpus import Corpus
 import numpy as np
 import pandas as pd
 from scipy.sparse import csr_matrix
 from sklearn.metrics.pairwise import cosine_similarity
+from tqdm import tqdm
 
 class SearchEngine:
     def __init__(self, corpus):
@@ -34,7 +35,7 @@ class SearchEngine:
         similarities = cosine_similarity(query_vector, self.mat_TF).flatten()
         top_indices = similarities.argsort()[-top_n:][::-1]
         results = []
-        for idx in top_indices:
+        for idx in tqdm(top_indices, desc="Recherche des documents"):
             doc_id=list(self.doc_index_mapping.keys())[list(self.doc_index_mapping.values()).index(idx)]
             doc = self.id2doc[doc_id]
             results.append({

@@ -15,8 +15,8 @@ La classe Corpus aura pour attributs:
 - ndoc : nombre des documents
 - naut : nombre des auteurs
 '''
-import Author
-import Document
+from author import Author
+from document import Document
 import pickle
 
 class Corpus:
@@ -27,14 +27,14 @@ class Corpus:
             cls._instance = super(Corpus, cls).__new__(cls)
         return cls._instance
     
-    def __init__(self, nom, authors, id2doc, all_texts):
+    def __init__(self, nom, authors=None, id2doc=None, all_texts=""):
         self.nom = nom
-        self.authors = authors
-        self.id2doc = id2doc
-        self.ndoc = len(id2doc)
-        self.naut = len(authors)
+        self.authors = authors if authors is not None else {}
+        self.id2doc = id2doc if id2doc is not None else {}
+        self.ndoc = len(self.id2doc)
+        self.naut = len(self.authors)
         self.initialized = True
-        self.all_texts=all_texts
+        self.all_texts = all_texts
 
     # Méthode pour ajouter un document
     def add(self, doc):
@@ -94,7 +94,7 @@ class Corpus:
             debut, fin = resultat.start(), resultat.end()
             cg = self.all_texts[debut-contexte:debut]
             cd = self.all_texts[fin:fin+contexte]
-            concordancier = concordancier.append({"Contexte gauche":cg, "Expression trouvée":self.all_texts[debut:fin], "Contexte droit":cd}, ignore_index=True)
+            concordancier = pd.concat([concordancier, pd.DataFrame([{"Contexte gauche": cg, "Expression trouvée": self.all_texts[debut:fin], "Contexte droit": cd}])], ignore_index=True)
         return concordancier
     
     #6.3: Méthode pour nettoyer un texte

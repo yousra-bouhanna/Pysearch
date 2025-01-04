@@ -1,16 +1,16 @@
 #2ème version: moteur de recherche, TD03 jusqu'au TD07
 #Importations
-import Document
-import Author
-import Corpus
+from document import Document
+from author import Author
+from corpus import Corpus
 import datetime
 import praw
 import urllib.request
 import json
 import xmltodict
 import pandas as pd 
-import DocumentFactory
-import SearchEngine
+import documentFactory
+from searchEngine import SearchEngine
 
 
 
@@ -34,11 +34,11 @@ for i, post in enumerate(hot_posts):
     if post.selftext:  # On évite les posts sans texte
         date = datetime.datetime.fromtimestamp(post.created, tz=datetime.timezone.utc)#Ajouté avec l'aide de copilot pour la résolution d'une erreur de comparaison de dates
         num_comments = post.num_comments
-        doc = DocumentFactory.DocumentFactory.create_document('Reddit', titre=post.title, auteur=post.author, date=date, url=post.url, texte=post.selftext, nb_com=post.num_comments)
+        doc = documentFactory.DocumentFactory.create_document('Reddit', titre=post.title, auteur=post.author, date=date, url=post.url, texte=post.selftext, nb_com=post.num_comments)
         id2doc[i] = doc
         author_name = str(post.author)
         if author_name not in id2aut:
-            id2aut[author_name] = Author.Author(author_name)
+            id2aut[author_name] = Author(author_name)
         id2aut[author_name].add(doc)
 
 nbr_RedditDocuments = len(id2doc)
@@ -58,10 +58,10 @@ for i, doc in enumerate(docs):
     authors = doc["author"]
     author_names = [author["name"] for author in authors] if isinstance(authors, list) else [authors["name"]]
     date = datetime.datetime.fromisoformat(doc["published"].replace("Z", "+00:00"))
-    doc = DocumentFactory.DocumentFactory.create_document('ArXiv', titre=doc["title"], auteur=author_names, date=date, url=doc["id"], texte=doc["summary"])
+    doc = documentFactory.DocumentFactory.create_document('ArXiv', titre=doc["title"], auteur=author_names, date=date, url=doc["id"], texte=doc["summary"])
     for author_name in author_names:
         if author_name not in id2aut:
-            id2aut[author_name] = Author.Author(author_name)
+            id2aut[author_name] = Author(author_name)
         id2aut[author_name].add(doc)
     
     id2doc[i + 200] = doc
@@ -117,7 +117,7 @@ print("La longueur de la chaine de caractères est de: ", len(all_texts))
 print(id2aut[list(id2aut.keys())[1]].stats())
 
 # 4.4: Création du corpus
-corpus=Corpus.Corpus("Mon corpus", id2aut, id2doc, all_texts)
+corpus=Corpus("Mon corpus", id2aut, id2doc, all_texts)
 print(corpus)
 
 # Les filtres pour les documents
@@ -145,7 +145,7 @@ print(corpus.stats())
 print(corpus.build_mat_TF_IDF())
 
 #7.5: Initialisation du moteur de recherche
-moteur=SearchEngine.SearchEngine(corpus)
+moteur=SearchEngine(corpus)
 
 #7.6: Recherche
 requete=input("Entrez votre requête: ")
