@@ -1,6 +1,11 @@
 # TDO4: Création des classes
 # TD05: Mise à jour pour prendre en compte les classes filles de Document
 
+import numpy as np
+from scipy.sparse import csr_matrix
+import re
+import pandas as pd
+
 #4.3: Création de la classe Corpus
 '''
 La classe Corpus aura pour attributs:
@@ -82,8 +87,6 @@ class Corpus:
         
     #6.2: Méthode qui permet de créer un concordancier pour une expression 
     def concorde(self, expression, contexte): # contexte ici est la taille du contexte 
-        import re
-        import pandas as pd 
         # on utilise la fonction finditer pour trouver toutes les occurences de l'expression dans la chaine de caractères
         resultats = re.finditer(expression, self.all_texts)
         concordancier=pd.DataFrame(columns=["Contexte gauche", "Expression trouvée", "Contexte droit"])
@@ -96,7 +99,6 @@ class Corpus:
     
     #6.3: Méthode pour nettoyer un texte
     def clean_text(self, texte):
-        import re
         texte = re.sub(r"\n", " ", texte)
         texte = re.sub(r"[.,;:!?]", " ", texte)
         texte = re.sub(r"[0-9]", " ", texte)
@@ -117,7 +119,6 @@ class Corpus:
     
     #6.5: Méthode pour calculer le nombre d'occurence de chaque mot du vocabulaire dans le corpus
     def nbr_occurence(self):
-        import pandas as pd
         vocabulaire = self.vocabulary()
         for doc in self.id2doc.values():
             texte = self.clean_text(doc.texte)
@@ -142,7 +143,75 @@ class Corpus:
             freq.loc[i, 'nbr_documents'] = ndoc_count
         return freq
     
+    #7.1: Méthode pour mettre à jour le dictionnaire vocabulaire, les mots seront triés par ordre alphabétique et chaque mot va indexer un autre dictionnaire contenant un id unique et le nombre d'occurence du mot en question
+    def vocab(self):
+        vocab = self.vocabulary()
+        vocab = {k:{"id":i, "nbr_occurence":v} for i, (k, v) in enumerate(sorted(vocab.items()))}
+        return vocab
 
-                                            
+    #7.2: Méthode pour construite la matrice document-terme
+    def build_mat_TF(self):
+        vocab = self.vocab()
+        nombre_mots=len(vocab)        
+        nombre_documents=len(self.id2doc)
+        # j'ai utilisé copilot pour cette méthode
+        # Initialisation des listes pour construite la matrice creuse
+        data = [] #nombre d'occurence de chaque mot dans chaque document
+        lignes = [] #indices des documents
+        colonnes = [] #indices des mots
+        doc_index_mapping = {doc_id: idx for idx, doc_id in enumerate(self.id2doc.keys())} #pour assurer la bonne correspondance entre les indices des documents et les indices des lignes de la matrice creuse
+        for doc_id, doc in self.id2doc.items():
+            texte = self.clean_text(doc.texte)
+            mots = texte.split()
+            mot_occ={} #dictionnaire pour stocker le nombre d'occurence de chaque mot dans le document
+            for mot in mots:
+                if mot in vocab:
+                    mot_id = vocab[mot]["id"]
+                    if mot_id not in mot_occ:
+                        mot_occ[mot_id] = 0
+                    mot_occ[mot_id] += 1
+
+            for mot_id, count in mot_occ.items():
+                    lignes.append(doc_index_mapping[doc_id])
+                    colonnes.append(mot_id)
+                    data.append(count)
+
+        # Construction de la matrice creuse
+        mat_TF=csr_matrix((data, (lignes, colonnes)), shape=(nombre_documents, nombre_mots))
+        self.doc_index_mapping = doc_index_mapping
+
+        return mat_TF
+    
+    #7.3: Méthode pour calculer des statistiques pour chaque mot du vocabulaire
+    def stats(self):
+        mat_TF = self.build_mat_TF()
+        vocab = self.vocab()
+        for mot in vocab:
+            mot_id = vocab[mot]["id"]
+            vocab[mot]["total_occurences"] = mat_TF[:,mot_id].sum() # somme des occurences de chaque mot dans tout le corpus
+            vocab[mot]["total_documents"] = (mat_TF[:,mot_id]>0).sum() # somme des documents qui contiennent chaque mot
+        # on supprime 'nbr_occurence' du dictionnaire vocab
+        for mot in vocab:
+            del vocab[mot]["nbr_occurence"] 
+        return vocab
         
-        
+    # 7.4: Méthode pour construire la matrice TF-IDF 
+    def build_mat_TF_IDF(self):
+        mat_TF = self.build_mat_TF()
+        vocab = self.vocab()
+        nombre_documents, nombre_mots = mat_TF.shape
+        # Initialisation de la matrice creuse
+        data = []
+        lignes = []
+        colonnes = []
+        for mot in vocab:
+            mot_id = vocab[mot]["id"]
+            # Calcul de l'IDF
+            vocab[mot]["IDF"] = np.log(nombre_documents / (1 + (mat_TF[:,mot_id]>0).sum()))
+            # Calcul de la matrice TF-IDF
+            for doc_id, doc in enumerate(self.id2doc.values()):
+                data.append(mat_TF[doc_id, mot_id] * vocab[mot]["IDF"])
+                lignes.append(doc_id)
+                colonnes.append(mot_id)
+        mat_TF_IDF = csr_matrix((data, (lignes, colonnes)), shape=(nombre_documents, nombre_mots))
+        return mat_TF_IDF

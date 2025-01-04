@@ -1,5 +1,4 @@
-#1ère version: Socle de base de l'application, TD03 jusqu'au TD05
-#--------!!!MISE JOUR POUR L'UTILISATION DE LA CLASSE DOCUMENT , LA CLASSE AUTHOR , LA CLASSE CORPUS et LES CLASSES FILLES!!!------
+#2ème version: moteur de recherche, TD03 jusqu'au TD07
 #Importations
 import Document
 import Author
@@ -11,6 +10,7 @@ import json
 import xmltodict
 import pandas as pd 
 import DocumentFactory
+import SearchEngine
 
 
 
@@ -29,7 +29,7 @@ On va récupérer le titre, l'auteur, le texte et l'url de chaque post
 '''
 id2doc={}
 id2aut={}
-hot_posts=reddit.subreddit('Chatgpt').hot(limit=50)
+hot_posts=reddit.subreddit('Chatgpt').hot(limit=30)
 for i, post in enumerate(hot_posts):
     if post.selftext:  # On évite les posts sans texte
         date = datetime.datetime.fromtimestamp(post.created, tz=datetime.timezone.utc)#Ajouté avec l'aide de copilot pour la résolution d'une erreur de comparaison de dates
@@ -48,7 +48,7 @@ print("Nombre d'auteurs Reddit: ", nbr_AuteurReddit)
 
 # Scraping des données ArXiV
 query="Chatgpt"
-url="http://export.arxiv.org/api/query?search_query=all:"+query+"&start=0&max_results=50"
+url="http://export.arxiv.org/api/query?search_query=all:"+query+"&start=0&max_results=30"
 data=urllib.request.urlopen(url).read()
 data=data.decode()
 # Conversion de data qui est sous forme XML en dictionnaire
@@ -135,3 +135,20 @@ corpus=corpus.load("corpus.pkl")
 #6.6: Affichage de la table freq
 print(corpus.nbr_documents())
 
+#7.2: Matrice termes-documents
+print(corpus.build_mat_TF())
+
+#7.3: Affichage des statistiques pour chaque mot
+print(corpus.stats())
+
+#7.4: Matrice TF-IDF
+print(corpus.build_mat_TF_IDF())
+
+#7.5: Initialisation du moteur de recherche
+moteur=SearchEngine.SearchEngine(corpus)
+
+#7.6: Recherche
+requete=input("Entrez votre requête: ")
+
+#7.7: Affichage des résultats
+print(moteur.search(requete, top_n=3))
