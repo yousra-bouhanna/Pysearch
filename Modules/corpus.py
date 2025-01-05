@@ -224,6 +224,9 @@ class Corpus:
    
 # Fonction pour comparer deux corpus
 def compare(corpus1, corpus2, top_n=100):
+    if not isinstance(corpus1, Corpus) or not isinstance(corpus2, Corpus):
+        raise TypeError("Les entrées doivent être des instances de la classe Corpus.")
+    
     texte1 = corpus1.all_texts
     texte2 = corpus2.all_texts
 
