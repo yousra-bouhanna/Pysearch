@@ -2,7 +2,7 @@
 #Importations
 from Modules.document import Document, RedditDocument, ArXivDocument
 from Modules.author import Author
-from Modules.corpus import Corpus
+from Modules.corpus import Corpus, compare, plot_wordcloud
 import datetime
 import praw
 import urllib.request
@@ -46,6 +46,7 @@ nbr_RedditDocuments = len(id2doc)
 nbr_AuteurReddit = len(id2aut)
 print("Nombre de documents Reddit: ", nbr_RedditDocuments)
 print("Nombre d'auteurs Reddit: ", nbr_AuteurReddit)
+
 
 # Scraping des données ArXiV
 query="Chatgpt"
@@ -133,8 +134,8 @@ print(corpus.sort_by_title(2, order="desc"))
 corpus.save(os.path.join("Data", "corpus.pkl"))
 
 #4.6: Chargement du corpus
-corpus = corpus.load(os.path.join("Data", "corpus.pkl"))
-
+corpus = Corpus.load(os.path.join("Data", "corpus.pkl"))
+'''
 #6.6: Affichage de la table freq
 print(corpus.nbr_documents())
 
@@ -146,7 +147,7 @@ print(corpus.stats())
 
 #7.4: Matrice TF-IDF
 print(corpus.build_mat_TF_IDF())
-
+'''
 #7.5: Initialisation du moteur de recherche
 moteur=SearchEngine(corpus)
 
@@ -155,3 +156,4 @@ requete=input("Entrez votre requête: ")
 
 #7.7: Affichage des résultats
 print(moteur.search(requete, top_n=3))
+

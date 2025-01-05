@@ -3,8 +3,12 @@
 
 import numpy as np
 from scipy.sparse import csr_matrix
+from sklearn.feature_extraction.text import TfidfVectorizer
 import re
+import os
 import pandas as pd
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
 
 #4.3: Création de la classe Corpus
 '''
@@ -75,7 +79,8 @@ class Corpus:
             pickle.dump(self, f)
 
     # Méthode pour charger le corpus en utilisant pickle
-    def load(self, filename):
+    @staticmethod
+    def load(filename):
         with open(filename, 'rb') as f:
             return pickle.load(f)
         
@@ -216,3 +221,72 @@ class Corpus:
                 colonnes.append(mot_id)
         mat_TF_IDF = csr_matrix((data, (lignes, colonnes)), shape=(nombre_documents, nombre_mots))
         return mat_TF_IDF
+   
+# Fonction pour comparer deux corpus
+def compare(corpus1, corpus2, top_n=100):
+    texte1 = corpus1.all_texts
+    texte2 = corpus2.all_texts
+
+    # Vectorisation TF-IDF
+    vectorizer = TfidfVectorizer()
+    X = vectorizer.fit_transform([texte1, texte2])
+
+    # Extraction des mots et des scores 
+    feature_names = vectorizer.get_feature_names_out()
+    tfidf_scores = X.toarray()
+
+    # Séparation des scores
+    scores1 = tfidf_scores[0]
+    scores2 = tfidf_scores[1]
+
+    #Identification des mots communs et mots spécifiques
+    common_words = set(feature_names[scores1 > 0]) & set(feature_names[scores2 > 0])
+    specific_words1 = set(feature_names[scores1 > 0]) - common_words
+    specific_words2 = set(feature_names[scores2 > 0]) - common_words
+    
+    # Limiter le nombre de mots affichés (fait avec l'aide de copilot)
+    common_words = sorted(common_words, key=lambda x: scores1[feature_names.tolist().index(x)] + scores2[feature_names.tolist().index(x)], reverse=True)[:top_n]
+    specific_words1 = sorted(specific_words1, key=lambda x: scores1[feature_names.tolist().index(x)], reverse=True)[:top_n]
+    specific_words2 = sorted(specific_words2, key=lambda x: scores2[feature_names.tolist().index(x)], reverse=True)[:top_n]
+
+    return common_words, specific_words1, specific_words2
+
+'''
+# Une manière plus simple de comparer les corpus en utilisant ce qui a été fait dans la classe Corpus
+def compare(corpus1, corpus2):
+
+    # Obtenir le vocabulaire des deux corpus
+    vocab1 = corpus1.vocab()
+    vocab2 = corpus2.vocab()
+    
+    # Obtenir les mots du vocabulaire
+    words1 = set(vocab1.keys())
+    words2 = set(vocab2.keys())
+    
+    # Identification des mots communs et spécifiques
+    common_words = words1 & words2
+    specific_words1 = words1 - common_words
+    specific_words2 = words2 - common_words
+    
+    return common_words, specific_words1, specific_words2
+'''
+
+# Fonction pour afficher un nuage de mots (utilisée pour la comparaison des corpus)
+# Créer le répertoire de sortie s'il n'existe pas
+def plot_wordcloud(words, title, Outputs="Outputs"):
+
+    if not os.path.exists(Outputs):
+        os.makedirs(Outputs)
+        
+    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(" ".join(words))
+    plt.figure(figsize=(10, 5))
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.title(title)
+    plt.axis('off')
+    # Enregistrer la figure en tant que fichier PNG
+    output_path = os.path.join(Outputs, f"{title}.png")
+    plt.savefig(output_path, format='png')
+    plt.show()
+    plt.close()
+
+    

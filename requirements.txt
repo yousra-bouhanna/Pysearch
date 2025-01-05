@@ -6,3 +6,4 @@ xmltodict
 tqdm
 ipywidgets
 streamlit
+wordcloud-1.9.4
