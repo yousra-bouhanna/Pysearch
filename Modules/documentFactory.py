@@ -1,6 +1,6 @@
 # 5.4: Utilisation du patron de conception singleton
 
-from document import RedditDocument, ArXivDocument
+from Modules.document import RedditDocument, ArXivDocument
 '''
 La classe DocumentFactory est une classe singleton qui permet de créer des documents.
 Elle contient une méthode statique create_document qui prend en paramètre le type de document et les attributs du document.

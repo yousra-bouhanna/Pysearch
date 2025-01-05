@@ -15,25 +15,26 @@ La classe Corpus aura pour attributs:
 - ndoc : nombre des documents
 - naut : nombre des auteurs
 '''
-from author import Author
-from document import Document
+from Modules.author import Author
+from Modules.document import Document
 import pickle
 
 class Corpus:
+    '''
     _instance = None
     # 5.4: Utilisation du patron de conception singleton
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super(Corpus, cls).__new__(cls)
         return cls._instance
-    
+    '''
     def __init__(self, nom, authors=None, id2doc=None, all_texts=""):
         self.nom = nom
         self.authors = authors if authors is not None else {}
         self.id2doc = id2doc if id2doc is not None else {}
         self.ndoc = len(self.id2doc)
         self.naut = len(self.authors)
-        self.initialized = True
+        #self.initialized = True
         self.all_texts = all_texts
 
     # Méthode pour ajouter un document
@@ -108,7 +109,7 @@ class Corpus:
     
     #6.4: Méthode pour créer le vocabulaire du corpus
     def vocabulary(self):
-        # je pense que c'est plus simple d'utiliser la chaine de caractères all_texts au lieu de parcourir tous les documents
+        # c'est plus simple d'utiliser la chaine de caractères all_texts au lieu de parcourir tous les documents
         all_texts=self.clean_text(self.all_texts)
         # on utilise set pour éliminer les doublons
         mots=set(all_texts.split())

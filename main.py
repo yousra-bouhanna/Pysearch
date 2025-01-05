@@ -1,16 +1,17 @@
 #2ème version: moteur de recherche, TD03 jusqu'au TD07
 #Importations
-from document import Document
-from author import Author
-from corpus import Corpus
+from Modules.document import Document, RedditDocument, ArXivDocument
+from Modules.author import Author
+from Modules.corpus import Corpus
 import datetime
 import praw
 import urllib.request
 import json
 import xmltodict
 import pandas as pd 
-import documentFactory
-from searchEngine import SearchEngine
+import Modules.documentFactory as DocumentFactory
+from Modules.searchEngine import SearchEngine
+import os
 
 
 
@@ -34,7 +35,7 @@ for i, post in enumerate(hot_posts):
     if post.selftext:  # On évite les posts sans texte
         date = datetime.datetime.fromtimestamp(post.created, tz=datetime.timezone.utc)#Ajouté avec l'aide de copilot pour la résolution d'une erreur de comparaison de dates
         num_comments = post.num_comments
-        doc = documentFactory.DocumentFactory.create_document('Reddit', titre=post.title, auteur=post.author, date=date, url=post.url, texte=post.selftext, nb_com=post.num_comments)
+        doc = RedditDocument( titre=post.title, auteur=post.author, date=date, url=post.url, texte=post.selftext, nb_com=post.num_comments)
         id2doc[i] = doc
         author_name = str(post.author)
         if author_name not in id2aut:
@@ -58,7 +59,7 @@ for i, doc in enumerate(docs):
     authors = doc["author"]
     author_names = [author["name"] for author in authors] if isinstance(authors, list) else [authors["name"]]
     date = datetime.datetime.fromisoformat(doc["published"].replace("Z", "+00:00"))
-    doc = documentFactory.DocumentFactory.create_document('ArXiv', titre=doc["title"], auteur=author_names, date=date, url=doc["id"], texte=doc["summary"])
+    doc = ArXivDocument( titre=doc["title"], auteur=author_names, date=date, url=doc["id"], texte=doc["summary"])
     for author_name in author_names:
         if author_name not in id2aut:
             id2aut[author_name] = Author(author_name)
@@ -79,14 +80,16 @@ Pour éviter d'intéroger les APIs à chaque fois, on va sauvegarder les donnée
 # Mise à jour du dataframe pour prendre en compte les attributs de la classe Document
 data=pd.DataFrame(columns=["id", "titre","auteur","date","url","texte","origin"])
 for i, doc in id2doc.items():
-    if i<200:
-        data.loc[i]=[i, doc.titre, doc.auteur, doc.date, doc.url, doc.texte, "Reddit"]
-    else:
-        data.loc[i]=[i, doc.titre, doc.auteur, doc.date, doc.url, doc.texte, "ArXiv"]
-# Sauvgarde du dataframe
-data.to_csv("data.csv", sep="\t", index=False)
-# Chargement en mémoire
-data=pd.read_csv("data.csv", sep="\t")
+    data.loc[i]=[i, doc.titre, doc.auteur, doc.date, doc.url, doc.texte, doc.type]
+
+# Create the directory if it doesn't exist
+os.makedirs("Data", exist_ok=True)
+
+# Sauvegarde du dataframe 
+data.to_csv(os.path.join("Data", "data.csv"), sep="\t", index=False)
+
+# Chargement en mémoire 
+data = pd.read_csv(os.path.join("Data", "data.csv"), sep="\t")
 
 #3.3: Manipulation des données 
 '''
@@ -107,7 +110,7 @@ data=data[data["texte"].apply(lambda x: len(x)>20)]
 print("La taille du corpus aprés la suppression est de: ", data.shape[0])
 
 # Mise à jour du fichier csv
-data.to_csv("data.csv", sep="\t", index=False)
+data.to_csv(os.path.join("Data", "data.csv"), sep="\t", index=False)
 
 # Chaine de caractères de tous les documents concaténés
 all_texts=" ".join(data["texte"])
@@ -127,10 +130,10 @@ print(corpus.sort_by_title(2, order="desc"))
 #print(corpus.sort_by_title(5, order="asc"))
 
 #4.5: Sauvegarde du corpus
-corpus.save("corpus.pkl")
+corpus.save(os.path.join("Data", "corpus.pkl"))
 
 #4.6: Chargement du corpus
-corpus=corpus.load("corpus.pkl")
+corpus = corpus.load(os.path.join("Data", "corpus.pkl"))
 
 #6.6: Affichage de la table freq
 print(corpus.nbr_documents())

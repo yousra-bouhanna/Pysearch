@@ -2,7 +2,7 @@
 '''
 La classe SearchEngine aura pour attributs:
 '''
-from corpus import Corpus
+from Modules.corpus import Corpus
 import numpy as np
 import pandas as pd
 from scipy.sparse import csr_matrix
