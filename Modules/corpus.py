@@ -9,6 +9,8 @@ import os
 import pandas as pd
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+from collections import defaultdict
+from datetime import datetime
 
 #4.3: Création de la classe Corpus
 '''
@@ -221,6 +223,40 @@ class Corpus:
                 colonnes.append(mot_id)
         mat_TF_IDF = csr_matrix((data, (lignes, colonnes)), shape=(nombre_documents, nombre_mots))
         return mat_TF_IDF
+    
+    #9.2: Méthode pour afficher l'évolution temporelle d'un mot ou d'un groupe de mots dans le corpus 
+    def evolution_temporelle(self, mots, freq='M'):
+        '''
+        :param mots: Liste de mots à observer
+        :param freq: Fréquence de découpage ('Y' pour année, 'M' pour mois)
+        :return: DataFrame avec les occurrences des mots par période et le plot
+        
+        '''
+        # Initialisation du dictionnaire pour stocker les occurrences des mots
+        # dictionnaire de dictionnaires 
+        occurrences = defaultdict(lambda: defaultdict(int))
+        
+        # Parcours des documents pour compter les occurrences des mots par période
+        for doc in self.id2doc.values():
+            date = pd.to_datetime(doc.date)
+            #Découpage temporel
+            periode = date.to_period(freq)
+            for mot in mots:
+                occurrences[periode][mot] += doc.texte.lower().split().count(mot.lower())
+        
+        # Conversion du dictionnaire en DataFrame
+        df = pd.DataFrame(occurrences).T.fillna(0)
+
+        # Tracer le graphique
+        ax = df.plot(kind='line', figsize=(10, 5))
+        plt.title("Évolution temporelle des mots")
+        plt.xlabel("Période")
+        plt.ylabel("Occurrences")
+        plt.legend(mots)
+        plt.show()
+        
+        return df, ax
+
    
 # Fonction pour comparer deux corpus
 def compare(corpus1, corpus2, top_n=100):
