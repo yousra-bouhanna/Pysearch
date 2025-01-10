@@ -357,3 +357,30 @@ elif menu == "Recherche avancée":
                     st.write("Aucun résultat trouvé.")
         else:
             st.error("Le fichier chargé n'est pas un corpus valide.")
+
+elif menu == "Comparer deux corpus":
+    st.header("Comparer deux corpus")
+    corpus1, corpus2 = load_two_corpora_from_sidebar()
+
+    if corpus1 and corpus2 and isinstance(corpus1, Corpus) and isinstance(corpus2, Corpus):
+        st.success("Les deux corpus ont été chargés avec succès !")
+        common_words, specific_words1, specific_words2 = compare(corpus1, corpus2)
+
+        if st.button("Afficher le nuage de mots communs"):
+            st.subheader("Nuage de mots pour les mots communs")
+            plot_wordcloud(common_words, "Mots communs")
+
+        if st.button("Afficher le nuage de mots spécifiques au premier corpus"):
+            st.subheader("Nuage de mots pour les mots spécifiques au premier corpus")
+            plot_wordcloud(specific_words1, "Mots spécifiques au premier corpus")
+
+        if st.button("Afficher le nuage de mots spécifiques au deuxième corpus"):
+            st.subheader("Nuage de mots pour les mots spécifiques au deuxième corpus")
+            plot_wordcloud(specific_words2, "Mots spécifiques au deuxième corpus")
+
+        st.subheader("Statistiques de comparaison")
+        st.write("Mots communs:", pd.DataFrame({"Mot": common_words}))
+        st.write("Mots spécifiques au premier corpus:", pd.DataFrame({"Mot": specific_words1}))
+        st.write("Mots spécifiques au deuxième corpus:", pd.DataFrame({"Mot": specific_words2}))
+    else:
+        st.warning("Veuillez charger deux corpus valides pour la comparaison.")
