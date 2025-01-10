@@ -1,6 +1,5 @@
 # TDO4: Création des classes
 # TD05: Mise à jour pour prendre en compte les classes filles de Document
-
 import numpy as np
 from scipy.sparse import csr_matrix
 from sklearn.feature_extraction.text import TfidfVectorizer
