@@ -32,7 +32,7 @@ Pysearch/
 - ![Python](https://img.shields.io/badge/-Python-3776AB?logo=python&logoColor=white) **Python**
 - ![Pandas](https://img.shields.io/badge/-Pandas-150458?logo=pandas&logoColor=white) **Pandas** : Analyse et manipulation des données.
 - ![NumPy](https://img.shields.io/badge/-NumPy-013243?logo=numpy&logoColor=white) **NumPy** : Calcul numérique pour les matrices et vecteurs.
-- ![Scikit-learn](https://img.shields.io/badge/-Scikit--learn-F7931E?logo=scikit-learn&logoColor=white) **Scikit-learn** : Calcul de TF-IDF et similarité cosinus.
+- ![Scikit-learn](https://img.shields.io/badge/-Scikit--learn-F7931E?logo=scikit-learn&logoColor=white) **Scikit-learn** : Similarité cosinus.
 
 ### Visualisation
 - ![Matplotlib](https://img.shields.io/badge/-Matplotlib-11557C?logo=matplotlib&logoColor=white) **Matplotlib** : Création de graphiques et visualisations.
