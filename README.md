@@ -8,17 +8,34 @@
 ## 📁 Structure du Projet
 ```bash
 Pysearch/
-├── Modules/
-│   ├── author.py             # Gestion des auteurs
-│   ├── corpus.py             # Gestion des corpus
-│   ├── searchEngine.py       # Moteur de recherche
-├── app.py                    # Application Streamlit principale
-├── requirements.txt          # Dépendances Python
-├── Data/                     # Données au format .pkl
-│   ├── corpus.pkl
-│   ├── discours.pkl
-└── Tests/
-    ├── test_corpus.py        # Tests unitaires pour les fonctionnalités des corpus
+├── Data/                      # Données utilisées dans le projet
+│   ├── ArXiv_corpus.pkl
+│   ├── Arxiv_data.csv
+│   │       .
+│   └── Reddit_corpus.pkl
+├── Modules/                   # Modules Python (Core logic)
+│   ├── __init__.py
+│   ├── author.py
+│   ├── corpus.py
+│   ├── document.py
+│   ├── documentFactory.py
+│   └── searchEngine.py
+├── Outputs/                   # Fichiers générés (Ex. Nuages de mots)
+│   ├── Common words.png
+│   ├── Unique words in corpus.png
+│   └── Unique words in discours.png
+├── Tests/                     # Scripts pour les tests unitaires
+│   ├── __init__.py
+│   └── test_corpus.py
+├── Tools/                     # Outils et scripts annexes
+│   ├── interface.ipynb
+│   └── main.py
+├── .gitignore                 # Fichiers à ignorer par Git
+├── app.py                     # Script principal de l'application Streamlit
+├── Corpora.py                 # Script supplémentaire pour gérer les corpus
+├── README.md                  # Documentation du projet
+└── requirements.txt           # Liste des dépendances Python
+
 ```
 
 --- 
