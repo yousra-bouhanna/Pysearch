@@ -6,7 +6,6 @@ from Modules.corpus import Corpus, compare, plot_wordcloud
 import datetime
 import praw
 import urllib.request
-import json
 import xmltodict
 import pandas as pd 
 import Modules.documentFactory as DocumentFactory

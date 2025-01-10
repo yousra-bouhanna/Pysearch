@@ -4,6 +4,7 @@ pandas
 praw
 xmltodict
 tqdm
+os
 ipywidgets
 streamlit
 streamlit
