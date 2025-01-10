@@ -7,7 +7,6 @@ from wordcloud import WordCloud
 import os
 import pickle
 import matplotlib.pyplot as plt
-from tabulate import tabulate
 import re
 
 # Initialisation de l'application Streamlit
