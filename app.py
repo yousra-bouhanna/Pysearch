@@ -135,7 +135,7 @@ def clean_dataframe(df):
 
 
 # Menu principal
-menu = st.sidebar.selectbox("Menu", ["Accueil", "Charger un corpus", "Analyse du corpus"])
+menu = st.sidebar.selectbox("Menu", ["Accueil", "Charger un corpus", "Analyse du corpus", "Moteur de recherche", "Comparer deux corpus", "Recherche avancée", "Évolution temporelle"])
 
 if menu == "Accueil":
     st.header("Bienvenue dans le moteur de recherche sur les documents !")
@@ -187,7 +187,7 @@ if menu == "Accueil":
     st.write("- **Sortie** :")
     st.write("  -- Liste des documents correspondant aux critères de recherche (url ..etc).")
     st.write("Cette section offre des options de recherche basées sur des métadonnées spécifiques.")
-    
+
 elif menu == "Charger un corpus":
     st.header("Charger un corpus depuis un fichier Pickle")
     corpus = load_corpus_from_sidebar()
