@@ -27,5 +27,7 @@ class Author:
     def stats(self):
         taille_totale = 0
         for i in self.production:
-            taille_totale += len(self.production[i].texte)
-        return f"Nombre de documents produits : {self.ndoc}\nTaille moyenne des documents : {taille_totale/self.ndoc}"
+            texte = getattr(self.production[i], "texte", None)
+            if texte:
+                taille_totale += len(self.production[i].texte)
+        return f"Nombre de documents produits : {self.ndoc}\nTaille moyenne des documents : {taille_totale/self.ndoc if self.ndoc > 0 else 0}"
