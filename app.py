@@ -132,3 +132,132 @@ def clean_dataframe(df):
     for column in df.select_dtypes(include=['object']).columns:
         df[column] = df[column].apply(lambda x: str(x).replace('\n', ' ').replace('\t', ' ') if pd.notnull(x) else x)
     return df
+
+
+# Menu principal
+menu = st.sidebar.selectbox("Menu", ["Accueil", "Charger un corpus", "Analyse du corpus"])
+
+if menu == "Accueil":
+    st.header("Bienvenue dans le moteur de recherche sur les documents !")
+    st.write("Explorez les fonctionnalités disponibles via le menu à gauche.")
+
+    st.subheader("Fonctionnalités disponibles")
+    
+    st.markdown("### 1. Charger un corpus")
+    st.write("- **Entrée** : Fichier `.pkl` contenant un corpus.")
+    st.write("- **Sortie** : Visualisation des métadonnées du corpus, comme le nombre de documents et d'auteurs.")
+    st.write("Cette section vous permet de charger un fichier corpus au format `.pkl` pour l'utiliser dans d'autres fonctionnalités.")
+
+    st.markdown("### 2. Analyse du corpus")
+    st.write("- **Entrée** : Fichier `.pkl` contenant un corpus.")
+    st.write("- **Sortie** :")
+    st.write("  -- Visualisation du contenu des documents.")
+    st.write("  -- Statistiques par auteur, incluant le nombre de documents et la taille moyenne des textes.")
+    st.write("  -- Liste des mots les plus utilisés et le nombre de documents contenant chaque mot.")
+    st.write("Cette section vous aide à explorer les détails et les statistiques globales du corpus.")
+
+    st.markdown("### 3. Moteur de recherche avancé")
+    st.write("- **Entrée** :")
+    st.write(" -- Une requête textuelle (mot-clé ou phrase).")
+    st.write("  -- Un fichier `.pkl` contenant un corpus.")
+    st.write("- **Sortie** :")
+    st.write("  -- Liste des documents pertinents triés par similarité.")
+    st.write("  -- Passages pertinents (seulement qui sont vraiment similaires) contenant les mots de la requête.")
+    st.write("Cette section vous permet de rechercher des documents pertinents à partir d'une requête.")
+
+elif menu == "Charger un corpus":
+    st.header("Charger un corpus depuis un fichier Pickle")
+    corpus = load_corpus_from_sidebar()
+
+    # Afficher les détails du corpus chargé
+    if corpus:
+        if isinstance(corpus, Corpus):
+            st.success("Corpus chargé avec succès !")
+            st.write(f"Nom du corpus : {corpus.nom}")
+            st.write(f"Nombre total de documents : {corpus.ndoc}")
+            st.write(f"Nombre total d'auteurs : {corpus.naut}")
+            st.subheader("Documents disponibles")
+            st.write(pd.DataFrame([{ 
+                "Titre": doc.titre, 
+                "Auteur": ", ".join(doc.auteur) if isinstance(doc.auteur, list) else str(doc.auteur), 
+                "Date": doc.date 
+            } for doc in corpus.id2doc.values()]))
+        else:
+            st.error("Le fichier chargé n'est pas un corpus valide.")
+
+
+elif menu == "Analyse du corpus":
+    st.header("Analyse du corpus")
+    corpus = load_corpus_from_sidebar()
+
+    if corpus:
+        if isinstance(corpus, Corpus):
+            st.success("Corpus chargé avec succès !")
+
+            # Afficher le contenu du corpus
+            st.subheader("Contenu du corpus")
+            st.write(pd.DataFrame([{ 
+                "Titre": doc.titre, 
+                "Auteur": ", ".join(doc.auteur) if isinstance(doc.auteur, list) else str(doc.auteur), 
+                "Date": doc.date 
+            } for doc in corpus.id2doc.values()]))
+            # Sélection d'un auteur et affichage de ses stats
+            st.subheader("Statistiques par auteur")
+            authors = list(corpus.authors.keys())
+            selected_author = st.selectbox("Sélectionnez un auteur:", authors)
+            if selected_author:
+                author_stats = corpus.authors[selected_author].stats()
+                st.write(f"Statistiques pour {selected_author}:")
+                st.write(author_stats)
+
+            # Mots les plus utilisés et Nombre de documents par mot
+            st.subheader("Mots les plus utilisés & Nombre de documents par mot")
+
+            try:
+                word_doc_freq = corpus.nbr_documents()
+                # Trier les données
+                word_doc_freq_sorted = word_doc_freq.sort_values(by="nbr_occurence", ascending=False)
+
+                # Afficher les données triées
+                st.dataframe(word_doc_freq_sorted)
+
+            except Exception as e:
+                st.error(f"Une erreur est survenue lors du calcul ou de l'affichage : {e}")
+
+        else:
+            st.error("Le fichier chargé n'est pas un corpus valide.")
+
+
+elif menu == "Moteur de recherche":
+    st.header("Moteur de recherche avancé")
+    corpus = load_corpus_from_sidebar()
+
+    if corpus:
+        if isinstance(corpus, Corpus):
+            st.success("Corpus chargé avec succès !")
+            search_engine = SearchEngine(corpus)
+
+            query = st.text_input("Entrez votre requête pour la recherche avancée:")
+            top_n = st.slider("Nombre de résultats à afficher:", min_value=1, max_value=20, value=5)
+
+            if st.button("Lancer la recherche") and query:
+                results = search_engine.search_motor(query, top_n)
+
+                if not results.empty:
+                    st.subheader("Résultats de la recherche")
+                    for _, row in results.iterrows():
+                        st.markdown(f"### {row['titre']}")
+                        st.markdown(f"**Auteur(s)**: {row['auteur']}")
+                        st.markdown(f"**Date**: {row['date']}")
+                        st.markdown(f"**Score de similarité**: {row['similarité']:.2f}")
+                        st.markdown(f"**URL**: [Lien]({row['url']})")
+                        st.markdown(f"**Nombre de passages trouvés**: {len(row['passages'])}")
+                        if row['passages']:
+                            st.markdown("#### Passages pertinents:")
+                            for passage in row['passages']:
+                                st.markdown(f"- {passage}")
+                        st.markdown("---")
+                else:
+                    st.write("Aucun résultat trouvé.")
+        else:
+            st.error("Le fichier chargé n'est pas un corpus valide.")
