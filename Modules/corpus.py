@@ -129,27 +129,37 @@ class Corpus:
     def nbr_occurence(self):
         vocabulaire = self.vocabulary()
         for doc in self.id2doc.values():
-            texte = self.clean_text(doc.texte)
-            mots = texte.split()
-            for mot in mots:
-                if mot in vocabulaire:
-                    vocabulaire[mot] += 1
+            if hasattr(doc, 'texte') and isinstance(doc.texte, str):
+                texte = self.clean_text(doc.texte)
+                mots = texte.split()
+                for mot in mots:
+                    if mot in vocabulaire:
+                        vocabulaire[mot] += 1
         # on construit un dataframe avec une colonne pour les mots du vocabulaire et une colonne pour les occurences 
         freq = pd.DataFrame([(k, v) for k, v in vocabulaire.items()], columns=["Mot", "nbr_occurence"])
         return freq
     
     #6.6: Méthode pour mettre à jour la table freq avec le nombre de documents qui contiennent chaque mot
-    def  nbr_documents(self):
+    def nbr_documents(self):
         freq = self.nbr_occurence()
+
+        # Limiter aux 100 premiers mots les plus fréquents
+        freq = freq.sort_values(by="nbr_occurence", ascending=False).head(50)      
+
         for i, row in freq.iterrows():
             mot = row['Mot']
             ndoc_count = 0
+
             for doc in self.id2doc.values():
-                texte = self.clean_text(doc.texte)
-                if mot in texte:
-                    ndoc_count += 1
+                if hasattr(doc, 'texte') and isinstance(doc.texte, str):
+                    texte = self.clean_text(doc.texte)
+                    if mot in texte:
+                        ndoc_count += 1
+
             freq.loc[i, 'nbr_documents'] = ndoc_count
+
         return freq
+
     
     #7.1: Méthode pour mettre à jour le dictionnaire vocabulaire, les mots seront triés par ordre alphabétique et chaque mot va indexer un autre dictionnaire contenant un id unique et le nombre d'occurence du mot en question
     def vocab(self):
