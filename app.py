@@ -165,6 +165,29 @@ if menu == "Accueil":
     st.write("  -- Passages pertinents (seulement qui sont vraiment similaires) contenant les mots de la requête.")
     st.write("Cette section vous permet de rechercher des documents pertinents à partir d'une requête.")
 
+    st.markdown("### 4. Comparer deux corpus")
+    st.write("- **Entrée** : Deux fichiers `.pkl` contenant des corpus.")
+    st.write("- **Sortie** :")
+    st.write("  -- Nuages de mots pour les mots communs et spécifiques à chaque corpus.")
+    st.write("  -- Statistiques détaillées sur les mots spécifiques et communs.")
+    st.write("Cette section compare les contenus textuels de deux corpus différents.")
+
+    st.markdown("### 5. Évolution temporelle")
+    st.write("- **Entrée** :")
+    st.write("  -- Fichier `.pkl` contenant un corpus.")
+    st.write("  -- Liste de mots à analyser.")
+    st.write("- **Sortie** :")
+    st.write("  -- Graphique montrant la fréquence des mots sélectionnés sur une échelle temporelle (mensuelle ou annuelle).")
+    st.write("Cette section vous aide à analyser l'évolution de l'utilisation des mots dans le temps.")
+
+    st.markdown("### 6. Recherche avancée")
+    st.write("- **Entrée** :")
+    st.write("  -- Type de recherche (Mot-clé, Auteur, Date, ou Source).")
+    st.write("  -- Fichier `.pkl` contenant un corpus.")
+    st.write("- **Sortie** :")
+    st.write("  -- Liste des documents correspondant aux critères de recherche (url ..etc).")
+    st.write("Cette section offre des options de recherche basées sur des métadonnées spécifiques.")
+    
 elif menu == "Charger un corpus":
     st.header("Charger un corpus depuis un fichier Pickle")
     corpus = load_corpus_from_sidebar()
