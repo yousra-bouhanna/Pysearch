@@ -384,3 +384,25 @@ elif menu == "Comparer deux corpus":
         st.write("Mots spécifiques au deuxième corpus:", pd.DataFrame({"Mot": specific_words2}))
     else:
         st.warning("Veuillez charger deux corpus valides pour la comparaison.")
+
+elif menu == "Évolution temporelle":
+    st.header("Évolution temporelle des mots")
+    corpus = load_corpus_from_sidebar()
+
+    if corpus:
+        if isinstance(corpus, Corpus):
+            st.success("Corpus chargé avec succès !")
+
+            vocab_df = corpus.nbr_occurence()
+            vocab_df_sorted = vocab_df.sort_values(by="nbr_occurence", ascending=False)
+            keywords = vocab_df_sorted["Mot"].tolist()
+
+            mots = st.multiselect("Sélectionnez les mots à analyser :", options=keywords, default=keywords[:5])
+
+            freq = st.selectbox("Sélectionnez la fréquence:", ["M", "Y"], format_func=lambda x: "Mensuelle" if x == "M" else "Annuelle")
+
+            if st.button("Analyser") and mots:
+                df, _ = corpus.evolution_temporelle(mots, freq)
+                st.line_chart(df)
+        else:
+            st.error("Le fichier chargé n'est pas un corpus valide.")
