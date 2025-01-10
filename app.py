@@ -112,7 +112,6 @@ def load_two_corpora_from_sidebar(default_directory="Data"):
 
     return corpus1, corpus2
 
-
 # Fonction pour générer un nuage de mots
 def plot_wordcloud(words, title):
     wordcloud = WordCloud(width=800, height=400, background_color='white').generate(" ".join(words))
