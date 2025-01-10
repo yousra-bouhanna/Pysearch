@@ -1,75 +1,127 @@
-# Pysearch: Moteur de Recherche Personnalisé - Traitement du Langage Naturel (NLP)
+# Pysearch 🔍
 
-## Présentation du projet
-Ce projet a été réalisé dans le cadre du cours de programmation avec Python. Il s'agit d'un moteur de recherche personnalisé axé sur le thème du **Traitement du Langage Naturel (NLP)**. Le projet extrait et analyse des données issues de deux sources principales : **Reddit** et **ArXiv**. L'objectif est de permettre à l'utilisateur d'effectuer des recherches avancées, de comparer les deux corpus, et de visualiser les tendances et les éléments clés sous forme graphique.
+**Moteur de Recherche Personnalisé** axé sur le **Traitement du Langage Naturel (NLP)**, conçu pour analyser et comparer des corpus issus de **Reddit** et **ArXiv**. Avec des fonctionnalités avancées comme la recherche filtrée, la comparaison de corpus, et l'analyse temporelle, Pysearch est un outil puissant pour explorer et visualiser des données textuelles.
 
-## fonctionnalités principales
-- **Recherche Classique**:
-    Recherche par texte libre dans les deux corpus.
-
-- **Recherche Avancée**
-    Filtrage par :
-    - Mots-clés
-    - Date 
-    - Auteur 
-    - Source (Reddit ou ArXiv)
-
-- **Comparaison des Corpus**
-    Génération de nuages de mots :
-    - Mots spécifiques à chaque corpus
-    - Mots en commun entre les deux corpus
-
-- **Analyse Temporelle**
-    Tracé de graphes montrant l'évolution temporelle de la fréquence d'un mot :
-    - Fréquence annuelle
-    - Fréquence mensuelle
-
-## Structure du projet
+---
 
 
-## Technologies utilisées
-- Interface: streamlit
-- Backend: Python
+## 📁 Structure du Projet
+```bash
+Pysearch/
+├── Modules/
+│   ├── author.py             # Gestion des auteurs
+│   ├── corpus.py             # Gestion des corpus
+│   ├── searchEngine.py       # Moteur de recherche
+├── app.py                    # Application Streamlit principale
+├── requirements.txt          # Dépendances Python
+├── Data/                     # Données au format .pkl
+│   ├── corpus.pkl
+│   ├── discours.pkl
+└── Tests/
+    ├── test_corpus.py        # Tests unitaires pour les fonctionnalités des corpus
+```
 
-## Prérequis: 
-Toutes les bibliothèques et dépendances nécessaires sont listées dans le fichier requirements.txt, situé à la racine du projet [requirements.txt](requirements.txt)
+--- 
 
-## Installation:
-1. Clonez le projet :
+## 🚀 Technologies Utilisées
+
+### Frontend
+- ![Streamlit](https://img.shields.io/badge/-Streamlit-FF4B4B?logo=streamlit&logoColor=white) **Streamlit**
+
+### Backend
+- ![Python](https://img.shields.io/badge/-Python-3776AB?logo=python&logoColor=white) **Python**
+- ![Pandas](https://img.shields.io/badge/-Pandas-150458?logo=pandas&logoColor=white) **Pandas** : Analyse et manipulation des données.
+- ![NumPy](https://img.shields.io/badge/-NumPy-013243?logo=numpy&logoColor=white) **NumPy** : Calcul numérique pour les matrices et vecteurs.
+- ![Scikit-learn](https://img.shields.io/badge/-Scikit--learn-F7931E?logo=scikit-learn&logoColor=white) **Scikit-learn** : Calcul de TF-IDF et similarité cosinus.
+
+### Visualisation
+- ![Matplotlib](https://img.shields.io/badge/-Matplotlib-11557C?logo=matplotlib&logoColor=white) **Matplotlib** : Création de graphiques et visualisations.
+- ![WordCloud](https://img.shields.io/badge/-WordCloud-009688?logo=wordcloud&logoColor=white) **WordCloud** : Génération de nuages de mots.
+
+### Gestion des Données
+- ![Pickle](https://img.shields.io/badge/-Pickle-FFCC00?logo=python&logoColor=black) **Pickle** : Sérialisation et désérialisation des corpus au format `.pkl`.
+
+---
+
+## 🚀 Fonctionnalités Principales
+
+### 🔍 **Moteur de Recherche**
+Effectuez des recherches sur des corpus textuels avec deux approches :
+- **Recherche Classique** : Recherche textuelle avec TF-IDF.
+- **Recherche Avancée** :
+  - Par **mot-clé** : Analyse sémantique des textes.
+  - Par **auteur** : Filtrage des documents par créateur.
+  - Par **date** : Recherche basée sur la période.
+  - Par **source** : Filtrage selon l'origine des données (Reddit ou ArXiv).
+
+### 📊 **Comparaison de Corpus**
+Identifiez les similarités et différences entre deux corpus :
+- Mots en commun.
+- Mots spécifiques à chaque corpus.
+- Nuages de mots interactifs pour une meilleure visualisation.
+
+### 📈 **Analyse Temporelle**
+Visualisez l'évolution de la fréquence des mots clés :
+- Analyse mensuelle ou annuelle.
+- Graphiques dynamiques.
+
+### 🛠️ **Analyse du Corpus**
+Obtenez des statistiques détaillées :
+- Liste des documents.
+- Mots les plus utilisés.
+- Fréquence des documents contenant chaque mot.
+
+
+
+---
+
+## 📄 Instructions d'Installation
+
+### Prérequis
+- Python 3.10+
+- `pip` pour la gestion des dépendances.
+
+---
+
+### Étapes d'installation
+
+1.  Clonez le dépôt Git :
     ```bash
     git clone https://github.com/yousra-bouhanna/Pysearch.git
     cd Pysearch
+    ```
 
-2. Créez et activez un environnement virtuel :
+2.  Créez et activez un environnement virtuel :
     ```bash
     python -m venv .venv
     source .venv/bin/activate  # Pour Unix
-    .\.venv\Scripts\activate   # Pour Windows 
+    .\.venv\Scripts\activate   # Pour Windows
+    ```
 
 3. Installez les dépendances :
     ```bash
     pip install -r requirements.txt
+    ```
 
 4. Lancez l'application :
     ```bash
     streamlit run app.py
+    ```
 
+---
 
-## Tests:
-Des tests unitaires ont été mis en place pour valider le bon fonctionnement des différentes fonctionnalités du projet. Ils sont disponibles dans le répertoire [.github/Tests](.github/Tests) 
+## 🧪 Tests Unitaires
 
-Vous pouvez executer les tests avec la commande:
-    ```bash
-    python -m unittest Tests/test_corpus.py
+### Commande pour exécuter les tests :
+```bash
+python -m unittest Tests/test_corpus.py
+```
 
+- Des tests unitaires ont été mis en place pour valider le bon fonctionnement des différentes fonctionnalités du projet.
 
-## Les contributeurs:
+---
+
+## 👥 Contributeurs
 
 - [Yousra Bouhanna](https://github.com/yousra-bouhanna)
 - [Mohamed Riad Sahrane](https://github.com/riadshrn)
-
-
-
-
-
-
