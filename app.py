@@ -284,3 +284,76 @@ elif menu == "Moteur de recherche":
                     st.write("Aucun résultat trouvé.")
         else:
             st.error("Le fichier chargé n'est pas un corpus valide.")
+
+elif menu == "Recherche avancée":
+    st.header("Recherche avancée dans le corpus")
+    corpus = load_corpus_from_sidebar()
+
+    if corpus:
+        if isinstance(corpus, Corpus):
+            st.success("Corpus chargé avec succès !")
+            search_engine = SearchEngine(corpus)
+
+            # Options de recherche
+            query_type = st.selectbox("Type de recherche:", ["Mot-clé", "Auteur", "Date", "Source"])
+
+            if query_type == "Mot-clé":
+                # Obtenir les mots du vocabulaire triés par occurrence
+                vocab_df = corpus.nbr_occurence()
+                vocab_df_sorted = vocab_df.sort_values(by="nbr_occurence", ascending=False)
+                keywords = vocab_df_sorted["Mot"].tolist()  # Prenez les 100 mots les plus fréquents
+                query = st.selectbox("Sélectionnez un mot-clé:", keywords)
+            elif query_type == "Auteur":
+                # Liste déroulante des auteurs disponibles
+                authors = list(corpus.authors.keys())
+                query = st.selectbox("Sélectionnez un auteur:", authors)
+            elif query_type == "Date":
+                # Liste déroulante des dates disponibles
+                dates = sorted({doc.date for doc in corpus.id2doc.values() if doc.date})
+                query = st.selectbox("Sélectionnez une date:", dates)
+            elif query_type == "Source":
+                # Liste déroulante pour les types de documents
+                sources = ["Reddit", "ArXiv"]
+                query = st.selectbox("Sélectionnez une source:", sources)
+
+            top_n = st.slider("Nombre de résultats à afficher:", min_value=1, max_value=20, value=5)
+
+            if st.button("Rechercher") and query:
+                # Effectuer la recherche en fonction du type
+                if query_type == "Mot-clé":
+                    results = search_engine.search_tfidf(query, top_n)
+                elif query_type == "Auteur":
+                    results = search_engine.search_author(query, top_n)
+                elif query_type == "Date":
+                    results = search_engine.search_date(query, top_n)
+                elif query_type == "Source":
+                    results = search_engine.search_source(query, top_n)
+
+                st.subheader("Résultats de la recherche")
+
+                # Visualisation et affichage des résultats
+                def plot_results(results, group_by="auteur"):
+                    if not results.empty:
+                        grouped = results.groupby(group_by).size()
+                        plt.figure(figsize=(10, 5))
+                        grouped.plot(kind="bar", color="skyblue")
+                        plt.title(f"Distribution des résultats par {group_by}")
+                        plt.xlabel(group_by.capitalize())
+                        plt.ylabel("Nombre de documents")
+                        st.pyplot(plt)
+                        plt.close()
+
+                if not results.empty:
+                    # Normaliser la colonne Auteur pour compatibilité
+                    if "auteur" in results.columns:
+                        results["auteur"] = results["auteur"].apply(lambda x: ", ".join(x) if isinstance(x, list) else str(x))
+                        results["url"] = results["url"].apply(lambda x: f"[Lien]({x})" if pd.notna(x) else "")
+                    results = clean_dataframe(results)
+                    st.write(results.to_markdown(index=False), unsafe_allow_html=True)
+                    #st.write(results)
+                    st.subheader("Visualisation des résultats")
+                    plot_results(results, group_by="auteur")
+                else:
+                    st.write("Aucun résultat trouvé.")
+        else:
+            st.error("Le fichier chargé n'est pas un corpus valide.")
